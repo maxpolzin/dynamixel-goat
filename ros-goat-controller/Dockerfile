@@ -4,9 +4,11 @@ FROM ros:humble-ros-core
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3-colcon-common-extensions \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy entrypoint script (which creates ros user with same uid/gid as host user)
+RUN pip3 install dynamixel-sdk
+
 COPY ros_entrypoint.sh /ros_entrypoint.sh
 
 WORKDIR /colcon_ws

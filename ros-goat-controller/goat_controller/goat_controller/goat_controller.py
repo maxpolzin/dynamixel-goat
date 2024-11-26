@@ -4,6 +4,10 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Joy
 
 
+from .dynamixel_controller import Dynamixel
+
+
+
 class GoatController(Node):
     def __init__(self):
         super().__init__('goat_controller')
@@ -23,6 +27,13 @@ class GoatController(Node):
 
         self.get_logger().info(f"Subscribed to {self.joystick_topic}")
         self.get_logger().info(f"Publishing velocity commands to {self.cmd_vel_topic}")
+
+        servo = Dynamixel(ID=[1,2, 3, 4], descriptive_device_name="BAZINGA", series_name=["xm", "xm"], baudrate=1000000, port_name="/dev/ttyUSB0")
+
+        servo.begin_communication()
+        servo.set_operating_mode("velocity", ID = "all")
+        
+        servo.read_current(ID = "all")
 
     def joystick_callback(self, msg: Joy):
         x_button = msg.buttons[0]
