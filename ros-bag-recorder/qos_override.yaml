@@ -13,3 +13,7 @@
   history: keep_all
   reliability: reliable
   
+/navsatfix:  
+  durability: volatile
+  history: keep_all
+  reliability: reliable
