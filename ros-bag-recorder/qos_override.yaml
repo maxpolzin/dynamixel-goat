@@ -1,9 +1,14 @@
-/livox/imu:
+/commanded_velocity:
   durability: volatile
   history: keep_all
   reliability: reliable
 
-/livox/lidar:
+/measured_velocity:
+  durability: volatile
+  history: keep_all
+  reliability: reliable
+  
+/current_consumption:
   durability: volatile
   history: keep_all
   reliability: reliable
