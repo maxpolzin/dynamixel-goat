@@ -10,7 +10,6 @@ services:
   rosblox-studio:
     image: ghcr.io/rosblox/studio:latest
     volumes:
-      # - ./studio/layout.json:/src/layout.json
       - ./studio/layout.json:/foxglove/default-layout.json
     ports:
       - 8080:8080
@@ -27,19 +26,34 @@ services:
       - ROS_DOMAIN_ID
     command: su - ros --whitelist-environment="ROS_DOMAIN_ID" /run.sh
 
-  ros-livox-ros-driver2:
-    image: ghcr.io/rosblox/ros-livox-ros-driver2:humble
+  ros-joy-linux:
+    image: ghcr.io/rosblox/ros-joy-linux:humble
     restart: always
     network_mode: "host"
     ipc: host
     pid: host
-    volumes:
-      - ./livox_ros_driver2/MID360_config.json:/colcon_ws/src/livox_ros_driver2/config/MID360_config.json
     environment:
       - UID=${HOST_UID}
       - ROS_DOMAIN_ID
     command: su - ros --whitelist-environment="ROS_DOMAIN_ID" /run.sh
+    volumes:
+      - /dev/input:/dev/input
 
+  rtklib:
+    image: ghcr.io/rosblox/rtklib:latest
+    restart: always
+    command: str2str -in ntrip://$NTRIP_USER:$NTRIP_PASSWORD@www.swipos.ch:2101/MSM_GISGEO_LV95LHN95 -b 1 -out tcpcli://192.168.60.1:6666
+
+  ros-septentrio-gnss-driver:
+    image: ghcr.io/rosblox/ros-septentrio-gnss-driver:humble
+    restart: always
+    network_mode: "host"
+    ipc: host
+    pid: host
+    environment:
+      - UID=${HOST_UID}
+      - ROS_DOMAIN_ID
+    command: su - ros --whitelist-environment="ROS_DOMAIN_ID" /run.sh
 
   ros-bag-recorder:
     image: ghcr.io/rosblox/ros-bag-recorder:humble
