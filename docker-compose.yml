@@ -30,14 +30,16 @@ services:
     image: ghcr.io/rosblox/ros-joy-linux:humble
     restart: always
     network_mode: "host"
+    volumes:
+      - /dev/input:/dev/input
+    privileged: true
     ipc: host
     pid: host
     environment:
       - UID=${HOST_UID}
       - ROS_DOMAIN_ID
     command: su - ros --whitelist-environment="ROS_DOMAIN_ID" /run.sh
-    volumes:
-      - /dev/input:/dev/input
+
 
   rtklib:
     image: ghcr.io/rosblox/rtklib:latest

@@ -8,6 +8,9 @@ services:
     network_mode: "host"
     ipc: host
     pid: host
+    devices:
+      - /dev/ttyUSB0
+    privileged: true
     environment:
       - UID=${HOST_UID}
       - ROS_DOMAIN_ID
