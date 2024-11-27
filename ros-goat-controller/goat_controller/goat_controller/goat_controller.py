@@ -34,9 +34,15 @@ class GoatController(Node):
         self.get_logger().info(f"Publishing measured velocity to {self.measured_velocity_topic}")
         self.get_logger().info(f"Publishing current consumption to {self.current_consumption_topic}")
 
-        self.servo = Dynamixel(ID=[2, 3], descriptive_device_name="BAZINGA", series_name=["xw", "xw"], baudrate=1000000, port_name="/dev/ttyUSB0")
+        self.servo = Dynamixel(ID=[0, 1, 2, 3], descriptive_device_name="BAZINGA", series_name=["xw", "xw", "xw", "xw"], baudrate=1000000, port_name="/dev/ttyUSB0")
         self.servo.begin_communication()
         self.servo.set_operating_mode("velocity", ID="all")
+
+        self.ID_FRONT_LEFT = 0
+        self.ID_BACK_LEFT = 1
+        self.ID_FRONT_RIGHT = 2 
+        self.ID_BACK_RIGHT = 3
+
 
     def joystick_callback(self, msg: Joy):
         triangle_button = msg.buttons[2]
@@ -68,8 +74,10 @@ class GoatController(Node):
         left_wheel_dynamixel_velocity = int(left_wheel_velocity * 310)
         right_wheel_dynamixel_velocity = int(right_wheel_velocity * 310)
 
-        self.servo.write_velocity(left_wheel_dynamixel_velocity, 2)
-        self.servo.write_velocity(right_wheel_dynamixel_velocity, 3)
+        self.servo.write_velocity(left_wheel_dynamixel_velocity, self.ID_FRONT_LEFT)
+        self.servo.write_velocity(right_wheel_dynamixel_velocity, self.ID_FRONT_RIGHT)
+        self.servo.write_velocity(left_wheel_dynamixel_velocity, self.ID_BACK_LEFT)
+        self.servo.write_velocity(right_wheel_dynamixel_velocity, self.ID_BACK_RIGHT)
 
         left_wheel_velocity = left_wheel_dynamixel_velocity * 0.226
         right_wheel_velocity = right_wheel_dynamixel_velocity * 0.226
@@ -80,35 +88,37 @@ class GoatController(Node):
         self.commanded_velocity_publisher.publish(commanded_velocity_msg)
 
         # Publish measured velocity
-        left_wheel_velocity_raw = self.servo.read_velocity(2)
-        right_wheel_velocity_raw = self.servo.read_velocity(3)
+        front_left_wheel_velocity_raw = self.servo.read_velocity(self.ID_FRONT_LEFT)
+        back_left_wheel_velocity_raw = self.servo.read_velocity(self.ID_BACK_LEFT)
+        front_right_wheel_velocity_raw = self.servo.read_velocity(self.ID_FRONT_RIGHT)
+        back_right_wheel_velocity_raw = self.servo.read_velocity(self.ID_BACK_RIGHT)
 
-        left_wheel_measured_velocity = left_wheel_velocity_raw * 0.226
-        right_wheel_measured_velocity = right_wheel_velocity_raw * 0.226
+        front_left_wheel_measured_velocity = front_left_wheel_velocity_raw * 0.226
+        back_left_wheel_measured_velocity = back_left_wheel_velocity_raw * 0.226
+        front_right_wheel_measured_velocity = front_right_wheel_velocity_raw * 0.226
+        back_right_wheel_measured_velocity = back_right_wheel_velocity_raw * 0.226
 
         measured_velocity_msg = Float32MultiArray()
-        measured_velocity_msg.data = [left_wheel_measured_velocity, right_wheel_measured_velocity]
+        measured_velocity_msg.data = [front_left_wheel_measured_velocity, back_left_wheel_measured_velocity, front_right_wheel_measured_velocity, back_right_wheel_measured_velocity]
         self.measured_velocity_publisher.publish(measured_velocity_msg)
 
         # Read and scale current consumption
-        left_wheel_current_raw = self.servo.read_current(2)
-        right_wheel_current_raw = self.servo.read_current(3)
+        front_left_wheel_current_raw = self.servo.read_current(self.ID_FRONT_LEFT)
+        back_left_wheel_current_raw = self.servo.read_current(self.ID_BACK_LEFT)
+        front_right_wheel_current_raw = self.servo.read_current(self.ID_FRONT_RIGHT)
+        back_right_wheel_current_raw = self.servo.read_current(self.ID_BACK_RIGHT)
 
-        left_wheel_current = left_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
-        right_wheel_current = right_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
+        front_left_wheel_current = front_left_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
+        back_left_wheel_current = back_left_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
+        front_right_wheel_current = front_right_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
+        back_right_wheel_current = back_right_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
 
         # Publish current consumption
         current_consumption_msg = Float32MultiArray()
-        current_consumption_msg.data = [left_wheel_current, right_wheel_current]
+        current_consumption_msg.data = [front_left_wheel_current, back_left_wheel_current, front_right_wheel_current, back_right_wheel_current]
         self.current_consumption_publisher.publish(current_consumption_msg)
 
         self.previous_button_states = msg.buttons
-
-        # self.get_logger().info(
-        #     f"Cmd: L {left_wheel_velocity:.3f}, R {right_wheel_velocity:.3f} | "
-        #     f"Meas: L {left_wheel_measured_velocity:.3f} RPS, R {right_wheel_measured_velocity:.3f} RPS | "
-        #     f"Cur: L {left_wheel_current:.3f} A, R {right_wheel_current:.3f} A"
-        # )
 
 
 def main(args=None):
