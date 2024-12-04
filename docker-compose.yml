@@ -71,6 +71,6 @@ services:
       - ROS_DOMAIN_ID
     working_dir: /bags    
     volumes:
-      - ~/bags:/bags
+      - /home/rock/bags:/bags
       - ./ros-bag-recorder/qos_override.yaml:/qos_override.yaml
-    command: su - ros --whitelist-environment=ROS_DOMAIN_ID  -c 'source /opt/ros/humble/setup.bash; ros2 bag record --max-cache-size 1000000000 -s mcap  --qos-profile-overrides-path /qos_override.yaml  --max-bag-size 200000000 /navsatfix /commanded_velocity /measured_velocity /current_consumption'
+    command: su - ros --whitelist-environment=ROS_DOMAIN_ID  -c 'source /opt/ros/humble/setup.bash; cd /bags; ros2 bag record --max-cache-size 1000000000 -s mcap  --qos-profile-overrides-path /qos_override.yaml  --max-bag-size 200000000 /navsatfix /commanded_velocity /measured_velocity /current_consumption'

@@ -45,8 +45,8 @@ class GoatController(Node):
 
         self.DIR_FRONT_LEFT = 1
         self.DIR_BACK_LEFT = 1
-        self.DIR_FRONT_RIGHT = 1 
-        self.DIR_BACK_RIGHT = 1
+        self.DIR_FRONT_RIGHT = -1 
+        self.DIR_BACK_RIGHT = -1
 
 
     def joystick_callback(self, msg: Joy):
@@ -74,7 +74,7 @@ class GoatController(Node):
             angular_velocity = 0.0
 
         left_wheel_velocity = linear_velocity - angular_velocity
-        right_wheel_velocity = -(linear_velocity + angular_velocity)
+        right_wheel_velocity = linear_velocity + angular_velocity
 
         left_wheel_dynamixel_velocity = int(left_wheel_velocity * 310)
         right_wheel_dynamixel_velocity = int(right_wheel_velocity * 310)
@@ -114,9 +114,9 @@ class GoatController(Node):
         back_right_wheel_current_raw = self.servo.read_current(self.ID_BACK_RIGHT)
 
         front_left_wheel_current = front_left_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
-        back_left_wheel_current = back_left_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
-        front_right_wheel_current = front_right_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
-        back_right_wheel_current = back_right_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
+        back_left_wheel_current =  back_left_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
+        front_right_wheel_current = self.DIR_FRONT_RIGHT * front_right_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
+        back_right_wheel_current = self.DIR_BACK_RIGHT * back_right_wheel_current_raw * 2.69e-3  # Scale raw current to Amps
 
         # Publish current consumption
         current_consumption_msg = Float32MultiArray()
